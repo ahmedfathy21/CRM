@@ -3,3 +3,9 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+# Local settings and secrets
+localappsettings.json
+appsettings.*.local.json
+secrets.json
+*.secret.*

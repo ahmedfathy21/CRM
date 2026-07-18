@@ -1,4 +1,5 @@
 using CRM.Common.Models;
+using CRM.Features.CRM.Common.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CRM.Features.CRM.Common.Data;
@@ -9,13 +10,13 @@ public class CrmDbContext : DbContext
     {
     }
 
-    public DbSet<Models.Contact> Contacts => Set<Models.Contact>();
-    public DbSet<Models.Company> Companies => Set<Models.Company>();
-    public DbSet<Models.Deal> Deals => Set<Models.Deal>();
-    public DbSet<Models.Activity> Activities => Set<Models.Activity>();
-    public DbSet<Models.Note> Notes => Set<Models.Note>();
-    public DbSet<Models.Tag> Tags => Set<Models.Tag>();
-    public DbSet<Models.ContactTag> ContactTags => Set<Models.ContactTag>();
+    public DbSet<Contact> Contacts => Set<Contact>();
+    public DbSet<Company> Companies => Set<Company>();
+    public DbSet<Deal> Deals => Set<Deal>();
+    public DbSet<Activity> Activities => Set<Activity>();
+    public DbSet<Note> Notes => Set<Note>();
+    public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<ContactTag> ContactTags => Set<ContactTag>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -5,6 +5,7 @@ using CRM.Common.Data;
 using CRM.Common.Models;
 using CRM.Common.Repositories;
 using CRM.Common.Services;
+using CRM.Features.CRM.Common.Data;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -83,6 +84,16 @@ public static class ServiceExtensions
         return services;
     }
 
+    public static IServiceCollection AddCrmDatabase(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<CrmDbContext>(options =>
+            options.UseNpgsql(
+                configuration.GetConnectionString("CrmConnection"),
+                npgsql => npgsql.MigrationsAssembly(typeof(Program).Assembly.GetName().Name)));
+
+        return services;
+    }
+
     public static IServiceCollection AddCrmInfrastructure(this IServiceCollection services)
     {
         var assembly = Assembly.GetExecutingAssembly();
@@ -100,9 +111,6 @@ public static class ServiceExtensions
         services.AddMemoryCache();
 
         services.AddScoped<ICacheService, InMemoryCacheService>();
-
-        services.AddScoped<UnitOfWork>();
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<UnitOfWork>());
 
         return services;
     }

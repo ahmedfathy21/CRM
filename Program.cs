@@ -1,5 +1,7 @@
 using CRM.Common.Extensions;
 using CRM.Common.Middleware;
+using CRM.Features.CRM.Common.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,7 @@ builder.Configuration.AddJsonFile("localappsettings.json", optional: true, reloa
 
 builder.Services
     .AddDatabase(builder.Configuration)
+    .AddCrmDatabase(builder.Configuration)
     .AddJwt(builder.Configuration)
     .AddAuthorizationPolicies()
     .AddCrmInfrastructure();
@@ -14,6 +17,14 @@ builder.Services
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var crmDb = scope.ServiceProvider.GetRequiredService<CrmDbContext>();
+    if (crmDb.Database.IsRelational())
+        await crmDb.Database.MigrateAsync();
+}
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 

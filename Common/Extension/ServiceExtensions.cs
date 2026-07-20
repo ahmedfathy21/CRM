@@ -3,6 +3,7 @@ using System.Text;
 using CRM.Common.Caching;
 using CRM.Common.Data;
 using CRM.Common.Models;
+using CRM.Common.Constants;
 using CRM.Common.Repositories;
 using CRM.Common.Services;
 using CRM.Features.CRM.Common.Data;
@@ -75,10 +76,10 @@ public static class ServiceExtensions
         services.AddAuthorization(options =>
         {
             options.AddPolicy("CrmAccess", policy =>
-                policy.RequireRole("Admin", "SalesRep", "SalesManager"));
+                policy.RequireRole(RoleConstants.Admin, RoleConstants.SalesRep, RoleConstants.SalesManager));
 
             options.AddPolicy("CrmManagerOnly", policy =>
-                policy.RequireRole("Admin", "SalesManager"));
+                policy.RequireRole(RoleConstants.Admin, RoleConstants.SalesManager));
         });
 
         return services;

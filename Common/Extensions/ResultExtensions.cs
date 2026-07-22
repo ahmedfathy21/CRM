@@ -29,4 +29,28 @@ public static class ResultExtensions
         };
     }
 
+    public static IActionResult ToPagedActionResult<T>(this Result<PagedResponse<T>> result)
+    {
+        if (result.IsSuccess)
+        {
+            var paged = result.Value!;
+            return new OkObjectResult(new
+            {
+                success = true,
+                data = paged.Data,
+                totalCount = paged.TotalCount,
+                page = paged.Page,
+                pageSize = paged.PageSize,
+                totalPages = paged.TotalPages,
+                hasNextPage = paged.HasNextPage,
+                hasPreviousPage = paged.HasPreviousPage,
+            });
+        }
+
+        var error = result.Error!;
+        return new ObjectResult(new { success = false, message = error.Description, errorCode = error.Code })
+        {
+            StatusCode = error.StatusCode,
+        };
+    }
 }

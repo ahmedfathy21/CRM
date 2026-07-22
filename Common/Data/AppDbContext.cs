@@ -16,6 +16,9 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
         builder.Entity<AppUser>(entity =>
         {
+            entity.Property(u => u.FirstName).HasMaxLength(100);
+            entity.Property(u => u.LastName).HasMaxLength(100);
+
             entity.Property(u => u.Role)
                 .HasConversion<string>()
                 .HasMaxLength(50);

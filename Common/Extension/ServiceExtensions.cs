@@ -30,6 +30,8 @@ public static class ServiceExtensions
             options.Password.RequireDigit = true;
             options.Password.RequiredLength = 8;
             options.Password.RequireNonAlphanumeric = false;
+            options.User.RequireUniqueEmail = true;
+            options.SignIn.RequireConfirmedEmail = false;
         })
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();

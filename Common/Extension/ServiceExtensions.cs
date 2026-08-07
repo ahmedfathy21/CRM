@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using CRM.Common.Behaviors;
 using CRM.Common.Caching;
 using CRM.Common.Data;
 using CRM.Common.Models;
@@ -104,6 +105,7 @@ public static class ServiceExtensions
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(assembly);
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
             cfg.AddOpenBehavior(typeof(CachingBehavior<,>));
         });
 

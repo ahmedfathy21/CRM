@@ -1,4 +1,5 @@
 using CRM.Common.Extensions;
+using CRM.Features.Auth.ForgotPassword;
 using CRM.Features.Auth.Login;
 using CRM.Features.Auth.Register;
 using MediatR;
@@ -36,6 +37,17 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var command = new LoginCommand { Request = request };
+        var result = await mediator.Send(command);
+        return result.ToActionResult();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        var command = new ForgotPasswordCommand { Request = request };
         var result = await mediator.Send(command);
         return result.ToActionResult();
     }

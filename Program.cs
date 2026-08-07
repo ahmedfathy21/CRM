@@ -1,7 +1,9 @@
+using CRM.Common.Data;
 using CRM.Common.Extensions;
 using CRM.Common.Middleware;
 using CRM.Features.CRM.Common.Data;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +18,6 @@ builder.Services
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -25,6 +26,10 @@ if (app.Environment.IsDevelopment())
     var crmDb = scope.ServiceProvider.GetRequiredService<CrmDbContext>();
     if (crmDb.Database.IsRelational())
         await crmDb.Database.MigrateAsync();
+
+    var appDb = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    if (appDb.Database.IsRelational())
+        await appDb.Database.MigrateAsync();
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
@@ -35,6 +40,8 @@ app.UseAuthorization();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+        options.WithTitle("CRM API").WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient));
 }
 
 app.MapControllers();

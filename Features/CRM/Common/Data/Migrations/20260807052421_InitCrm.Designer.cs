@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CRM.Features.CRM.Common.Data.Migrations
 {
     [DbContext(typeof(CrmDbContext))]
-    [Migration("20260718160425_InitCrm")]
+    [Migration("20260807052421_InitCrm")]
     partial class InitCrm
     {
         /// <inheritdoc />
@@ -204,7 +204,7 @@ namespace CRM.Features.CRM.Common.Data.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique()
-                        .HasFilter("\"email\" IS NOT NULL");
+                        .HasFilter("\"Email\" IS NOT NULL");
 
                     b.HasIndex("Status");
 

@@ -245,7 +245,7 @@ namespace CRM.Features.CRM.Common.Data.Migrations
                 table: "contacts",
                 column: "Email",
                 unique: true,
-                filter: "\"email\" IS NOT NULL");
+                filter: "\"Email\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_contacts_Status",

@@ -201,7 +201,7 @@ namespace CRM.Features.CRM.Common.Data.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique()
-                        .HasFilter("\"email\" IS NOT NULL");
+                        .HasFilter("\"Email\" IS NOT NULL");
 
                     b.HasIndex("Status");
 

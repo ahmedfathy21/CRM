@@ -26,7 +26,7 @@ public class ContactConfiguration : IEntityTypeConfiguration<Contact>
             .HasDefaultValue(ContactSource.Other);
         entity.Property(c => c.AssignedToUserId).HasMaxLength(450);
 
-        entity.HasIndex(c => c.Email).IsUnique().HasFilter("\"email\" IS NOT NULL");
+        entity.HasIndex(c => c.Email).IsUnique().HasFilter("\"Email\" IS NOT NULL");
         entity.HasIndex(c => c.Status);
         entity.HasIndex(c => c.AssignedToUserId);
         entity.HasIndex(c => c.CompanyId);

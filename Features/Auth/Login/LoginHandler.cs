@@ -1,3 +1,4 @@
+using CRM.Common.Extensions;
 using CRM.Common.Models;
 using CRM.Common.Services;
 using CRM.Common.Wrappers;
@@ -32,13 +33,8 @@ public class LoginHandler : IRequestHandler<LoginCommand, Result<TokenResponse>>
         user.LastLoginAt = DateTime.UtcNow;
         await _userManager.UpdateAsync(user);
 
-        var token = _jwtService.GenerateToken(user);
+        var token = await _jwtService.GenerateTokenAsync(user, ct);
 
-        return Result.Success(new TokenResponse
-        {
-            AccessToken = token.AccessToken,
-            RefreshToken = token.RefreshToken,
-            ExpiresAt = token.ExpiresAt,
-        });
+        return Result.Success(token.ToTokenResponse());
     }
 }

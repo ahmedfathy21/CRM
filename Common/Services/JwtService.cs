@@ -38,13 +38,15 @@ public class TokenResult
 public class JwtService
 {
     private readonly JwtSettings _settings;
+    private readonly IRefreshTokenService _refreshTokenService;
 
-    public JwtService(IOptions<JwtSettings> settings)
+    public JwtService(IOptions<JwtSettings> settings, IRefreshTokenService refreshTokenService)
     {
         _settings = settings.Value;
+        _refreshTokenService = refreshTokenService;
     }
 
-    public TokenResult GenerateToken(AppUser user)
+    public async Task<TokenResult> GenerateTokenAsync(AppUser user, CancellationToken ct)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -68,10 +70,20 @@ public class JwtService
             expires: expiresAt,
             signingCredentials: credentials);
 
+        var refreshToken = new RefreshToken
+        {
+            Token = GenerateRefreshToken(),
+            JwtId = jwtId,
+            UserId = user.Id,
+            ExpiresAt = DateTime.UtcNow.AddDays(_settings.RefreshTokenExpiryInDays),
+        };
+
+        await _refreshTokenService.StoreAsync(refreshToken, ct);
+
         return new TokenResult
         {
             AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
-            RefreshToken = GenerateRefreshToken(),
+            RefreshToken = refreshToken.Token,
             ExpiresAt = expiresAt,
         };
     }

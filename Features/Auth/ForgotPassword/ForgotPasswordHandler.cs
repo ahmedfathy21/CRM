@@ -25,8 +25,8 @@ public class ForgotPasswordHandler : IRequestHandler<ForgotPasswordCommand, Resu
         if (user == null)
             return Result.Success(new ForgotPasswordResponse());
 
-        var code = _otpService.Generate(email);
+        var code = await _otpService.GenerateAsync(email, ct);
 
-        return Result.Success(new ForgotPasswordResponse { Otp = await code });
+        return Result.Success(new ForgotPasswordResponse { Otp = code });
     }
 }

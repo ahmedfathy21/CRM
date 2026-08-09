@@ -24,4 +24,8 @@
         <PackageReference Include="Scalar.AspNetCore" Version="2.14.14" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Features\Auth\Verify-otp\" />
+    </ItemGroup>
+
 </Project>

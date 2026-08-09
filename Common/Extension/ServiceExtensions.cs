@@ -117,6 +117,7 @@ public static class ServiceExtensions
 
         services.AddScoped<ICacheService, InMemoryCacheService>();
         services.AddScoped<IOtpService, OtpService>();
+        services.AddScoped<IRefreshTokenService, InMemoryRefreshTokenService>();
 
         return services;
     }

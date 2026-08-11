@@ -1,7 +1,11 @@
 using CRM.Common.Extensions;
 using CRM.Features.Auth.ForgotPassword;
 using CRM.Features.Auth.Login;
+using CRM.Features.Auth.Logout;
+using CRM.Features.Auth.RefreshToken;
 using CRM.Features.Auth.Register;
+using CRM.Features.Auth.ResetPassword;
+using CRM.Features.Auth.VerifyOtp;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -48,6 +52,53 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
         var command = new ForgotPasswordCommand { Request = request };
+        var result = await mediator.Send(command);
+        return result.ToActionResult();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("refresh-token")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    {
+        var command = new RefreshTokenCommand { Request = request };
+        var result = await mediator.Send(command);
+        return result.ToActionResult();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("verify-otp")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request)
+    {
+        var command = new VerifyOtpCommand { Request = request };
+        var result = await mediator.Send(command);
+        return result.ToActionResult();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        var command = new ResetPasswordCommand { Request = request };
+        var result = await mediator.Send(command);
+        return result.ToActionResult();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+    {
+        var command = new LogoutCommand { Request = request };
         var result = await mediator.Send(command);
         return result.ToActionResult();
     }

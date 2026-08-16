@@ -1,3 +1,4 @@
+using AutoMapper.QueryableExtensions;
 using AutoMapper;
 using CRM.Common.Extensions;
 using CRM.Common.Wrappers;
@@ -29,15 +30,13 @@ public class GetContactByIdQueryHandler : IRequestHandler<GetContactByIdQuery, R
 
     public async Task<Result<ContactResponse>> Handle(GetContactByIdQuery request, CancellationToken cancellationToken)
     {
-        var contact = await _dbContext.Contacts
-            .Include(c => c.Company)
-            .Include(c => c.ContactTags)
-                .ThenInclude(ct => ct.Tag)
-            .Include(c => c.Deals)
-            .Include(c => c.Activities.OrderByDescending(a => a.CreatedAt).Take(5)) // recent 5 activities
-            .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
+        var response = await _dbContext.Contacts
+            .AsNoTracking()
+            .Where(c => c.Id == request.Id)
+            .ProjectTo<ContactResponse>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        if (contact == null)
+        if (response == null)
             return Result.Failure<ContactResponse>(Error.NotFound("Contact", request.Id));
 
         var user = _httpContextAccessor.HttpContext?.User;
@@ -45,18 +44,17 @@ public class GetContactByIdQueryHandler : IRequestHandler<GetContactByIdQuery, R
             return Result.Failure<ContactResponse>(Error.Unauthorized());
 
         // Authorization Scoping logic
-        if (!user.IsCrmManager() && contact.AssignedToUserId != user.GetUserId())
-        {
-            return Result.Failure<ContactResponse>(Error.Forbidden("You do not have permission to view this contact."));
-        }
-        
-        var response = _mapper.Map<ContactResponse>(contact);
+        // We have to query the AssignedToUserId separately if we don't include it in ContactResponse, 
+        // but wait, is AssignedToUserId in ContactResponse? No.
+        // Let's add an explicit DB check for scoping or add it to response. Let's do an explicit check in the DB query.
 
-        // Manually map tags if necessary (since MappingProfile ignored them or if we want them custom)
-        // Wait, MappingProfile ignored Tags, Deals, RecentActivities, we must map them here.
-        response.Tags = contact.ContactTags.Select(ct => _mapper.Map<TagDto>(ct.Tag)).ToList();
-        response.Deals = contact.Deals.Select(d => _mapper.Map<DealSummaryDto>(d)).ToList();
-        response.RecentActivities = contact.Activities.Select(a => _mapper.Map<ActivityResponse>(a)).ToList();
+        if (!user.IsCrmManager())
+        {
+            var userId = user.GetUserId();
+            var hasAccess = await _dbContext.Contacts.AnyAsync(c => c.Id == request.Id && c.AssignedToUserId == userId, cancellationToken);
+            if (!hasAccess)
+                return Result.Failure<ContactResponse>(Error.Forbidden("You do not have permission to view this contact."));
+        }
 
         return Result.Success(response);
     }

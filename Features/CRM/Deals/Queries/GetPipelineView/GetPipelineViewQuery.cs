@@ -1,3 +1,4 @@
+using AutoMapper.QueryableExtensions;
 using AutoMapper;
 using CRM.Common.Extensions;
 using CRM.Common.Wrappers;
@@ -56,24 +57,26 @@ public class GetPipelineViewQueryHandler : IRequestHandler<GetPipelineViewQuery,
             query = query.Where(d => d.OwnerUserId == request.OwnerUserId);
         }
 
-        // Only pull active deals for the pipeline view (or all, but group them)
-        var deals = await query
-            .Include(d => d.Company)
+        // Pull only required DTO fields via ProjectTo to minimize memory load
+        var dealsData = await query
+            .AsNoTracking()
             .OrderByDescending(d => d.CreatedAt)
+            .ProjectTo<DealSummaryDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
         var response = new PipelineViewResponse();
 
         foreach (DealStage stage in Enum.GetValues(typeof(DealStage)))
         {
-            var stageDeals = deals.Where(d => d.Stage == stage).ToList();
+            var stageString = stage.ToString();
+            var stageDeals = dealsData.Where(d => d.Stage == stageString).ToList();
             
             var column = new PipelineColumnResponse
             {
-                Stage = stage.ToString(),
+                Stage = stageString,
                 TotalValue = stageDeals.Sum(d => d.Value),
                 DealsCount = stageDeals.Count,
-                Deals = _mapper.Map<List<DealSummaryDto>>(stageDeals)
+                Deals = stageDeals
             };
 
             response.Columns.Add(column);

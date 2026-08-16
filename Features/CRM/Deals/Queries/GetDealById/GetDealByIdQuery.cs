@@ -1,3 +1,4 @@
+using AutoMapper.QueryableExtensions;
 using AutoMapper;
 using CRM.Common.Extensions;
 using CRM.Common.Wrappers;
@@ -26,24 +27,26 @@ public class GetDealByIdQueryHandler : IRequestHandler<GetDealByIdQuery, Result<
 
     public async Task<Result<DealResponse>> Handle(GetDealByIdQuery request, CancellationToken cancellationToken)
     {
-        var deal = await _dbContext.Deals
-            .Include(d => d.Contact)
-            .Include(d => d.Company)
-            .Include(d => d.Activities.OrderByDescending(a => a.CreatedAt))
-            .Include(d => d.Notes.OrderByDescending(n => n.CreatedAt))
-            .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+        var response = await _dbContext.Deals
+            .AsNoTracking()
+            .Where(d => d.Id == request.Id)
+            .ProjectTo<DealResponse>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        if (deal == null)
+        if (response == null)
             return Result.Failure<DealResponse>(Error.NotFound("Deal", request.Id));
 
         var user = _httpContextAccessor.HttpContext?.User;
         if (user == null)
             return Result.Failure<DealResponse>(Error.Unauthorized());
 
-        if (!user.IsCrmManager() && deal.OwnerUserId != user.GetUserId())
-            return Result.Failure<DealResponse>(Error.Forbidden("You do not have permission to view this deal."));
-
-        var response = _mapper.Map<DealResponse>(deal);
+        if (!user.IsCrmManager())
+        {
+            var userId = user.GetUserId();
+            var hasAccess = await _dbContext.Deals.AnyAsync(d => d.Id == request.Id && d.OwnerUserId == userId, cancellationToken);
+            if (!hasAccess)
+                return Result.Failure<DealResponse>(Error.Forbidden("You do not have permission to view this deal."));
+        }
 
         return Result.Success(response);
     }

@@ -1,3 +1,4 @@
+using AutoMapper.QueryableExtensions;
 using AutoMapper;
 using CRM.Common.Extensions;
 using CRM.Common.Wrappers;
@@ -67,14 +68,13 @@ public class GetDealsListQueryHandler : IRequestHandler<GetDealsListQuery, Resul
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var deals = await query
+        var data = await query
+            .AsNoTracking()
             .OrderByDescending(d => d.CreatedAt)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Include(d => d.Company)
+            .ProjectTo<DealSummaryDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
-
-        var data = _mapper.Map<List<DealSummaryDto>>(deals);
 
         var response = new PagedResponse<DealSummaryDto>
         {

@@ -1,3 +1,4 @@
+using AutoMapper.QueryableExtensions;
 using AutoMapper;
 using CRM.Common.Extensions;
 using CRM.Common.Wrappers;
@@ -76,13 +77,13 @@ public class GetContactsListQueryHandler : IRequestHandler<GetContactsListQuery,
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var contacts = await query
+        var data = await query
+            .AsNoTracking()
             .OrderByDescending(c => c.CreatedAt)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
+            .ProjectTo<ContactSummaryDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
-
-        var data = _mapper.Map<List<ContactSummaryDto>>(contacts);
 
         var response = new PagedResponse<ContactSummaryDto>
         {

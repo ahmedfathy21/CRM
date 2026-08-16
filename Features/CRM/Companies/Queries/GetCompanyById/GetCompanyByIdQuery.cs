@@ -1,3 +1,4 @@
+using AutoMapper.QueryableExtensions;
 using AutoMapper;
 using CRM.Common.Wrappers;
 using CRM.Features.CRM.Common.Data;
@@ -22,18 +23,14 @@ public class GetCompanyByIdQueryHandler : IRequestHandler<GetCompanyByIdQuery, R
 
     public async Task<Result<CompanyResponse>> Handle(GetCompanyByIdQuery request, CancellationToken cancellationToken)
     {
-        var company = await _dbContext.Companies
-            .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
+        var response = await _dbContext.Companies
+            .AsNoTracking()
+            .Where(c => c.Id == request.Id)
+            .ProjectTo<CompanyResponse>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        if (company == null)
+        if (response == null)
             return Result.Failure<CompanyResponse>(Error.NotFound("Company", request.Id));
-
-        var response = _mapper.Map<CompanyResponse>(company);
-
-        response.ContactsCount = await _dbContext.Contacts.CountAsync(c => c.CompanyId == company.Id, cancellationToken);
-        var openDeals = await _dbContext.Deals.Where(d => d.CompanyId == company.Id && d.ClosedAt == null).ToListAsync(cancellationToken);
-        response.OpenDealsCount = openDeals.Count;
-        response.OpenDealsValue = openDeals.Sum(d => d.Value);
 
         return Result.Success(response);
     }

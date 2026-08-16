@@ -1,3 +1,4 @@
+using AutoMapper.QueryableExtensions;
 using AutoMapper;
 using CRM.Common.Wrappers;
 using CRM.Features.CRM.Common.Data;
@@ -43,13 +44,13 @@ public class GetCompaniesListQueryHandler : IRequestHandler<GetCompaniesListQuer
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var companies = await query
+        var data = await query
+            .AsNoTracking()
             .OrderBy(c => c.Name)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
+            .ProjectTo<CompanySummaryDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
-
-        var data = _mapper.Map<List<CompanySummaryDto>>(companies);
 
         var response = new PagedResponse<CompanySummaryDto>
         {

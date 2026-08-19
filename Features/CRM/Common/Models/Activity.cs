@@ -15,6 +15,8 @@ public class Activity : BaseEntity
     public Guid? DealId { get; set; }
     public string CreatedByUserId { get; set; } = string.Empty;
 
+    public bool IsDeleted { get; set; }
+
     public Contact? Contact { get; set; }
     public Deal? Deal { get; set; }
 }

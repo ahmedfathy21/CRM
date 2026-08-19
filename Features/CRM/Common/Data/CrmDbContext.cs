@@ -33,6 +33,8 @@ public class CrmDbContext : DbContext
                     .HasDefaultValueSql("NOW()");
             }
         }
+        
+        builder.Entity<Activity>().HasQueryFilter(a => !a.IsDeleted);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken ct = default)

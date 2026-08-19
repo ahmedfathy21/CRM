@@ -30,6 +30,9 @@ public class MappingProfile : Profile
 
         CreateMap<Activity, ActivityResponse>()
             .ForMember(d => d.Type, o => o.MapFrom(s => s.Type.ToString()));
+            
+        CreateMap<Activity, ActivitySummaryDto>()
+            .ForMember(d => d.Type, o => o.MapFrom(s => s.Type.ToString()));
 
         CreateMap<Note, NoteResponse>();
 

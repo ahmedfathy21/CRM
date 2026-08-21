@@ -35,6 +35,14 @@ public class CrmDbContext : DbContext
         }
         
         builder.Entity<Activity>().HasQueryFilter(a => !a.IsDeleted);
+
+        // Dashboard Optimization Indexes
+        builder.Entity<Deal>().HasIndex(d => new { d.OwnerUserId, d.Stage });
+        builder.Entity<Deal>().HasIndex(d => new { d.ClosedAt });
+        
+        builder.Entity<Contact>().HasIndex(c => new { c.AssignedToUserId, c.Status });
+        
+        builder.Entity<Activity>().HasIndex(a => new { a.CreatedByUserId, a.IsCompleted, a.ScheduledAt });
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken ct = default)
